@@ -10,9 +10,13 @@
 
 #include <arrows/stanag/kwiver_algo_stanag_export.h>
 
-#include "stanag_4607_segments.h"
 #include "stanag_util.h"
 
+#include <arrows/stanag/segments/stanag_4607_dwell_segment.h>
+#include <arrows/stanag/segments/stanag_4607_mission_segment.h>
+#include <arrows/stanag/segments/stanag_4607_segments.h>
+
+#include <arrows/stanag/segments/stanag_4607_segment_lookup.h>
 namespace ka = kwiver::arrows;
 
 #include <map>
@@ -26,6 +30,9 @@ namespace kwiver {
 namespace arrows {
 
 namespace stanag {
+
+using stanag_4607_segments = typename std::variant< stanag_4607_mission_segment,
+                                                    stanag_4607_dwell_segment >;
 
 // ----------------------------------------------------------------------------
 /// Indicates the classification level of a packet
@@ -89,7 +96,6 @@ KWIVER_ALGO_STANAG_EXPORT
 std::ostream&
 operator<<( std::ostream& os, stanag_4607_packet_security const& value );
 
-
 // ----------------------------------------------------------------------------
 DECLARE_STANAG_CMP( stanag_4607_packet_security )
 
@@ -150,13 +156,11 @@ class KWIVER_ALGO_STANAG_EXPORT stanag_4607_packet_header_format
 public:
   stanag_4607_packet_header_format();
 
-
   const size_t size = 32; // Number of  bytes in packet header
 
   stanag_4607_packet_header
   read( ptr_t& ptr ) const;
 };
-
 
 // ----------------------------------------------------------------------------
 /// Top level STANAG 4607 packet
@@ -164,8 +168,7 @@ struct KWIVER_ALGO_STANAG_EXPORT stanag_4607_packet
 {
   stanag_4607_packet_header header;
   std::vector< stanag_4607_segment_header > segment_headers;
-  std::vector< stanag_4607_mission_segment > segments; // TODO: make this any
-                                                       // segment type
+  std::vector< stanag_4607_segments > segments;
 };
 
 // ----------------------------------------------------------------------------
@@ -192,12 +195,11 @@ public:
   read( ptr_t& ptr ) const;
 };
 
-
 // ----------------------------------------------------------------------------
 /// Read the input data as a list of packets
 KWIVER_ALGO_STANAG_EXPORT
 std::vector< stanag_4607_packet >
-read_stanag_4607_data( ptr_t& ptr );
+read_stanag_4607_data( std::vector< uint8_t > input_bytes );
 
 } // Namespace stanag
 
