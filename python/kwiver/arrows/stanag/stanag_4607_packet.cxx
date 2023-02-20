@@ -171,9 +171,10 @@ stanag_4607_packet( py::module& m )
                      py::list buffer;
                      for( auto segment : self.segments )
                      {
-                       std::visit( [ buffer ]( const auto& x ){
-                                     buffer.append( x );
-                                   }, segment );
+                      std::visit( [ &buffer ]( auto& x )
+                      {
+                        buffer.append(x);
+                      }, segment );
                      }
                      return buffer;
                    },
